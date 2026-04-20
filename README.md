@@ -44,8 +44,10 @@ This project helped me learn real AI/ML workflow, solve data issues, and build a
 
 ## How to Run
 
-1. Start the Flask backend:
+1. Start the Flask backend from the `backend` folder:
    ```powershell
+   cd backend
+   pip install -r requirements.txt
    python app.py
    ```
 

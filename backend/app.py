@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, jsonify
 import pandas as pd
 import numpy as np
@@ -34,7 +35,9 @@ def load_and_preprocess_data():
     global X_train, X_test, y_train, y_test, X_scaled, models
     
     # Load data
-    df = pd.read_csv('elite_dataset.csv')
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    csv_path = os.path.join(script_dir, 'elite_dataset.csv')
+    df = pd.read_csv(csv_path)
     
     # Handle missing values
     numeric_cols = [col for col in df.columns if col.startswith('feature_')]
