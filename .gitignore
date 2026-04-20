@@ -1,0 +1,87 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*,cover
+
+# Translations
+*.mo
+*.pot
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# PyEnv
+.python-version
+
+# Virtual environment
+venv/
+ENV/
+env/
+.venv/
+
+# Node / Next.js
+node_modules/
+.next/
+frontend/node_modules/
+frontend/.next/
+
+# Flask instance folder
+instance/
+
+# VS Code settings
+.vscode/
+
+# Environment variables
+.env
+.env.*
+
+# MacOS
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Static build files
+*.pyc
+
+# Dataset files
+*.csv
+*.sqlite3
+
+# Other
+*.bak
+*.tmp
+*/.pytest_cache/
