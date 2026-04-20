@@ -155,6 +155,64 @@ def data_info():
     }
     return jsonify(info)
 
+@app.route('/api/backend_info')
+def backend_info():
+    """Return backend dataset and model configuration details"""
+    global df_clean, feature_cols, models, label_encoders
+
+    class_counts = df_clean['target'].value_counts().to_dict()
+    class_distribution = {str(label): int(count) for label, count in class_counts.items()}
+
+    dataset_info = {
+        'row_count': int(df_clean.shape[0]),
+        'column_count': int(df_clean.shape[1]),
+        'feature_columns': feature_cols,
+        'numeric_features': [col for col in feature_cols if col.startswith('feature_')],
+        'categorical_features': [col for col in feature_cols if col.endswith('_encoded')],
+        'target_name': 'target',
+        'target_distribution': class_distribution,
+        'label_encoders': {
+            'segment': label_encoders['segment'].classes_.tolist() if 'segment' in label_encoders else [],
+            'region': label_encoders['region'].classes_.tolist() if 'region' in label_encoders else []
+        }
+    }
+
+    model_info = {}
+    for name, model in models.items():
+        params = {}
+        if name == 'Decision Tree':
+            params = {
+                'max_depth': model.get_params().get('max_depth'),
+                'min_samples_split': model.get_params().get('min_samples_split'),
+                'min_samples_leaf': model.get_params().get('min_samples_leaf'),
+                'random_state': model.get_params().get('random_state')
+            }
+        elif name == 'KNN':
+            params = {
+                'n_neighbors': model.get_params().get('n_neighbors'),
+                'weights': model.get_params().get('weights'),
+                'metric': model.get_params().get('metric')
+            }
+        elif name == 'SVM':
+            params = {
+                'C': model.get_params().get('C'),
+                'kernel': model.get_params().get('kernel'),
+                'gamma': model.get_params().get('gamma'),
+                'probability': model.get_params().get('probability')
+            }
+        else:
+            params = model.get_params()
+
+        model_info[name] = {
+            'class': model.__class__.__name__,
+            'params': params
+        }
+
+    return jsonify({
+        'dataset': dataset_info,
+        'models': model_info
+    })
+
 @app.route('/api/model_metrics')
 def model_metrics():
     """Return metrics for all models"""
@@ -247,28 +305,49 @@ def distributions():
 @app.route('/api/predict', methods=['POST'])
 def predict():
     """Make prediction for user input"""
-    data = request.json
-    
-    # This would need to parse the 24 features from the request
-    # For demo, return sample prediction
-    features = data.get('features', [0]*24)
-    
+    data = request.json or {}
+
+    num_numeric = max(len(feature_cols) - 2, 0)
+    raw_features = data.get('features', [])
+    if not isinstance(raw_features, list):
+        raw_features = []
+
+    if len(raw_features) < num_numeric:
+        raw_features = raw_features + [0] * (num_numeric - len(raw_features))
+    raw_features = raw_features[:num_numeric]
+    raw_features = [float(x) if x is not None else 0.0 for x in raw_features]
+
+    segment = data.get('segment')
+    region = data.get('region')
+
+    try:
+        seg_val = int(label_encoders['segment'].transform([segment if segment in label_encoders['segment'].classes_ else label_encoders['segment'].classes_[0]])[0])
+    except Exception:
+        seg_val = 0
+
+    try:
+        reg_val = int(label_encoders['region'].transform([region if region in label_encoders['region'].classes_ else label_encoders['region'].classes_[0]])[0])
+    except Exception:
+        reg_val = 0
+
+    features = raw_features + [seg_val, reg_val]
+
     # Scale features
     features_scaled = scaler.transform([features])
-    
+
     model_name = data.get('model', 'Decision Tree')
     model = models.get(model_name)
-    
+
     if model:
         prediction = model.predict(features_scaled)[0]
         probability = model.predict_proba(features_scaled)[0].tolist() if hasattr(model, 'predict_proba') else [0, 0]
-        
+
         return jsonify({
             'prediction': int(prediction),
             'probability': probability,
             'model_used': model_name
         })
-    
+
     return jsonify({'error': 'Model not found'}), 400
 
 if __name__ == '__main__':
