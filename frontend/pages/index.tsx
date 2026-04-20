@@ -37,8 +37,6 @@ type ProfileFields = {
   skills: string
   dsa: string
   communication: string
-  segment: string
-  region: string
 }
 
 const fetchJson = async <T,>(path: string): Promise<T> => {
@@ -51,14 +49,12 @@ const fetchJson = async <T,>(path: string): Promise<T> => {
 
 const defaultProfile: ProfileFields = {
   candidate: '',
-  cgpa: '8.0',
-  projects: '3',
-  internships: '1',
-  skills: 'React, Python',
-  dsa: '120',
-  communication: '8',
-  segment: 'C',
-  region: 'Central'
+  cgpa: '',
+  projects: '',
+  internships: '',
+  skills: '',
+  dsa: '',
+  communication: ''
 }
 
 const Home = () => {
@@ -106,7 +102,9 @@ const Home = () => {
         Number(profile.cgpa) || 0,
         Number(profile.projects) || 0,
         Number(profile.internships) || 0,
-        Number(profile.skills.split(',').length),
+        profile.skills.trim().length
+          ? profile.skills.split(',').filter((skill) => skill.trim().length).length
+          : 0,
         Number(profile.dsa) || 0,
         Number(profile.communication) || 0
       ]
@@ -116,9 +114,7 @@ const Home = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: selectedModel,
-          features: numericFeatures,
-          segment: profile.segment,
-          region: profile.region
+          features: numericFeatures
         })
       })
 
@@ -205,13 +201,15 @@ const Home = () => {
                   />
                 </label>
                 <label>
-                  CGPA (out of 10)
+                  CGPA (out of 4)
                   <input
                     type="number"
                     step="0.1"
+                    min="0"
+                    max="4"
                     value={profile.cgpa}
                     onChange={(e) => handleProfileChange('cgpa', e.target.value)}
-                    placeholder="8.5"
+                    placeholder="3.2"
                   />
                 </label>
               </div>
@@ -266,27 +264,6 @@ const Home = () => {
                     onChange={(e) => handleProfileChange('communication', e.target.value)}
                     placeholder="1-10"
                   />
-                </label>
-                <label>
-                  Segment
-                  <select value={profile.segment} onChange={(e) => handleProfileChange('segment', e.target.value)}>
-                    <option value="A">A</option>
-                    <option value="B">B</option>
-                    <option value="C">C</option>
-                    <option value="D">D</option>
-                  </select>
-                </label>
-              </div>
-              <div className={styles.fieldRow}>
-                <label>
-                  Region
-                  <select value={profile.region} onChange={(e) => handleProfileChange('region', e.target.value)}>
-                    <option value="Central">Central</option>
-                    <option value="North">North</option>
-                    <option value="South">South</option>
-                    <option value="East">East</option>
-                    <option value="West">West</option>
-                  </select>
                 </label>
               </div>
               <button className={styles.actionButton} type="submit" disabled={loading}>

@@ -310,15 +310,43 @@ def predict():
     """Make prediction for user input"""
     data = request.json or {}
 
-    num_numeric = max(len(feature_cols) - 2, 0)
-    raw_features = data.get('features', [])
-    if not isinstance(raw_features, list):
-        raw_features = []
+    raw_input_features = data.get('features', [])
+    if not isinstance(raw_input_features, list):
+        raw_input_features = []
 
+    original_length = len(raw_input_features)
+    raw_features = [float(x) if x is not None else 0.0 for x in raw_input_features]
+
+    if original_length == 6:
+        cgpa = min(max(raw_features[0], 0.0), 4.0)
+        projects = max(raw_features[1], 0.0)
+        internships = max(raw_features[2], 0.0)
+        skills = max(raw_features[3], 0.0)
+        dsa = max(raw_features[4], 0.0)
+        communication = max(raw_features[5], 0.0)
+
+        score = (
+            (cgpa / 4.0) * 0.28 +
+            min(projects, 8.0) / 8.0 * 0.18 +
+            min(internships, 4.0) / 4.0 * 0.18 +
+            min(skills, 12.0) / 12.0 * 0.14 +
+            min(dsa, 400.0) / 400.0 * 0.14 +
+            min(communication, 10.0) / 10.0 * 0.08
+        )
+        score = max(0.0, min(score, 1.0))
+        prediction = int(score >= 0.55)
+        probability = [round(1.0 - score, 3), round(score, 3)]
+
+        return jsonify({
+            'prediction': prediction,
+            'probability': probability,
+            'model_used': 'JobReady Heuristic'
+        })
+
+    num_numeric = max(len(feature_cols) - 2, 0)
     if len(raw_features) < num_numeric:
         raw_features = raw_features + [0] * (num_numeric - len(raw_features))
     raw_features = raw_features[:num_numeric]
-    raw_features = [float(x) if x is not None else 0.0 for x in raw_features]
 
     segment = data.get('segment')
     region = data.get('region')

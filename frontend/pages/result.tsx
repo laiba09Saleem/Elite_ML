@@ -18,8 +18,6 @@ type ProfileFields = {
   skills: string
   dsa: string
   communication: string
-  segment: string
-  region: string
 }
 
 type StoredResult = {
@@ -127,16 +125,16 @@ const ResultPage = () => {
             <p>{improvementTip}</p>
             <div className={styles.detailList}>
               <div className={styles.detailItem}>
-                <strong>Segment</strong>
-                <span>{stored?.profile.segment || 'C'}</span>
+                <strong>Skills</strong>
+                <span>{stored?.profile.skills || 'Not specified'}</span>
               </div>
               <div className={styles.detailItem}>
-                <strong>Region</strong>
-                <span>{stored?.profile.region || 'Central'}</span>
+                <strong>Communication</strong>
+                <span>{stored?.profile.communication || 'Not specified'}</span>
               </div>
               <div className={styles.detailItem}>
                 <strong>Model</strong>
-                <span>{stored?.result.model_used || 'Decision Tree'}</span>
+                <span>{stored?.result.model_used || 'JobReady Heuristic'}</span>
               </div>
             </div>
           </div>
